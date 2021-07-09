@@ -91,12 +91,14 @@ let testCase = []
 for (let x=0;x<10**5;x++){
     testCase.push(Math.floor(Math.random()*(10**4)))
 }
+let testCase1 = [4,3,2,1,4]
 console.log(testCase)
 console.log(testCase.length)
 let a = performance.now()
 console.log(maxArea(testCase))
 let b = performance.now()
 console.log(`It took ${b-a} ms`)
+testCase=[];
 /*    
  var maxArea = function(height) {
     let max = 0;
@@ -113,7 +115,7 @@ console.log(`It took ${b-a} ms`)
 //attempting Greedy
 var maxArea = function(height) {
     let gMax=0;
-    let gMin=0;
+    let gMin=height.length;
     let area=0;
     let collection={};
     for (let i=0;i<height.length;i++){
@@ -129,10 +131,10 @@ var maxArea = function(height) {
     console.log(collection);
     console.log(sorted);
     for (let j=0;j<sorted.length;j++){
-        if (gMax>=sorted[j].max) gMax=sorted[j].max
-        if (gMin<=sorted[j].min) gMin=sorted[j].min
-        console.log(`gMax: ${gMax}, gMin: ${gMin}`)
-        area = sorted[j]*(gMax-gMin)
+        if (gMax<=collection[sorted[j]].max) gMax=collection[sorted[j]].max
+        if (gMin>=collection[sorted[j]].min) gMin=collection[sorted[j]].min
+        //console.log(`gMax: ${gMax}, gMin: ${gMin}`)
+        if (area<=sorted[j]*(gMax-gMin)) area = sorted[j]*(gMax-gMin)
         
     }
     
