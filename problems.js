@@ -22,6 +22,29 @@
     }
 }
 
+// 4. Median of Two Sorted Arrays
+// https://leetcode.com/problems/median-of-two-sorted-arrays/
+/**
+ * @param {number[]} nums1
+ * @param {number[]} nums2
+ * @return {number}
+ */
+ var findMedianSortedArrays = function(nums1, nums2) {
+    let merged = [...nums1].concat([...nums2]);
+    merged = merged.sort((a,b)=>(a-b))
+    console.log(merged)
+    if ((nums1.length+nums2.length)%2==1){
+        return merged[(nums1.length+nums2.length-1)/2]
+    } else {
+        return (merged[(nums1.length+nums2.length)/2] + merged[(nums1.length+nums2.length)/2-1])/2
+    }
+};
+let t1 = [1,2,9]
+let t2 = [5,13,19]
+let a = performance.now()
+console.log(findMedianSortedArrays(t1,t2))
+let b = performance.now()
+console.log(`It took ${b-a} ms`)
 
 // 8. String to Integer (atoi) 
 // https://leetcode.com/problems/string-to-integer-atoi/
@@ -310,6 +333,63 @@ var maxArea = function(height) {
     let target = /\./g
     return address.replace(target,"[.]")
 };
+
+// 1751. Maximum Number of Events That Can Be Attended II
+// https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended-ii/
+/**
+ * @param {number[][]} events
+ * @param {number} k
+ * @return {number}
+ */
+ var maxValue = function(events, k) {
+    let total = 0;
+    // Greedy: 
+    // 1. Value Density
+    // 2. Value
+    // (3. duration)
+    let vds = {}; // hash for val den, {vd:[[start1,end1,value1], [start2,end2,value2],...]}
+    // Allocate based on max value density
+    // Value density = Value / (stop - start)
+    let vd = 0;
+    for (let i=0;i<events.length;i++){
+        vd = events[i][2]/(events[i][1]-events[i][0]);
+        if (vds[vd]!=undefined){
+            vds[vd].push(events[i]);
+            console.log("repeated");
+        } else {
+            console.log(vd);
+            vds[vd]=[events[i]];
+        }
+    }
+    let vdKeys = Object.keys(vds).sort((a,b)=>(b-a));
+    let eventCount = 0;
+    let days = [];
+    for (let j=0;j<vdKeys.length;j++){
+        vds[vdKeys[j]] = vds[vdKeys[j]].sort((a,b)=>(b[2]-a[2]))
+        for (let x=0;x<vds[vdKeys[j]].length;x++){
+            if (eventCount<k){
+                if (days.length==0){
+                    days.concat(vds[vdKeys[j][x][0]],vds[vdKeys[j][x][1]])
+                } else {
+                    for (let d=0;d<days.length;d++){
+                        
+                    }
+                }
+                
+                total += vds[vdKeys[j]][x][2]*1;
+                eventCount++;
+            } else {
+                return total
+            }
+        }
+    }
+};
+let tEvents = [[1,2,4],[3,4,3],[2,3,1]]
+let tk = 2
+let a = performance.now();
+console.log(maxValue(tEvents,tk));
+let b = performance.now();
+console.log(`It took ${b-a} ms`);
 
 
 // 1865. Finding Pairs With a Certain Sum
