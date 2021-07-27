@@ -357,27 +357,47 @@ var maxArea = function(height) {
             vds[vd].push(events[i]);
             console.log("repeated");
         } else {
-            console.log(vd);
+            console.log(`vd: ${vd}`);
             vds[vd]=[events[i]];
         }
     }
     let vdKeys = Object.keys(vds).sort((a,b)=>(b-a));
     let eventCount = 0;
-    let days = [];
+    let days = []; // occupied days - [start1, end1, start2, end2,...]
+    const updateDays = (days,s,e)=>{
+        if (days.length==0){ // when this is the first event
+            days.push(s,e)
+            console.log(`flag1, days:${days}`)
+            return days;
+        } else { // determine whether the current event clashed with any existing events
+            // //vds[vdKeys[j][x][0]]
+            for (let e=0;e<days.length/2;e++){
+                if (%2==0){ // d is even, ie a start
+                    if (s<days[d] && e<days[d]){ //(start, end) earlier than d 
+                        days = days.slice(0,d).concat(s,e).concat([...days.slice(d)]);
+                        console.log(`flag2, days:${days}`)
+                        return days;
+                    }
+                } else if (d==days.length-1) {    // the last ending
+                    if (s>days[d] && e>days[d]){ //(start,end) later than d
+                        days = days.push(s,e);
+                        console.log(`flag3, days:${days}`)
+                        return days;
+                    }
+                }
+            }
+            return days;
+        }
+    }
     for (let j=0;j<vdKeys.length;j++){
         vds[vdKeys[j]] = vds[vdKeys[j]].sort((a,b)=>(b[2]-a[2]))
         for (let x=0;x<vds[vdKeys[j]].length;x++){
             if (eventCount<k){
-                if (days.length==0){
-                    days.concat(vds[vdKeys[j][x][0]],vds[vdKeys[j][x][1]])
-                } else {
-                    for (let d=0;d<days.length;d++){
-                        
-                    }
+                if (days.length<updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1]).length){
+                    days = updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1]);
+                    total += vds[vdKeys[j]][x][2]*1;
+                    eventCount++;
                 }
-                
-                total += vds[vdKeys[j]][x][2]*1;
-                eventCount++;
             } else {
                 return total
             }
