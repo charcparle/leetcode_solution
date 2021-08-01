@@ -329,7 +329,8 @@ var maxArea = function(height) {
  * @param {string} address
  * @return {string}
  */
- var defangIPaddr = function(address) {
+
+var defangIPaddr = function(address) {
     let target = /\./g
     return address.replace(target,"[.]")
 };
@@ -341,9 +342,11 @@ var maxArea = function(height) {
  * @param {number} k
  * @return {number}
  */
+
+/*
  var maxValue = function(events, k) {
     let total = 0;
-    // Greedy: 
+    // Greedy:
     // 1. Value Density
     // 2. Value
     // (3. duration)
@@ -364,48 +367,131 @@ var maxArea = function(height) {
     let vdKeys = Object.keys(vds).sort((a,b)=>(b-a));
     let eventCount = 0;
     let days = []; // occupied days - [start1, end1, start2, end2,...]
-    const updateDays = (days,s,e)=>{
-        if (days.length==0){ // when this is the first event
-            days.push(s,e)
-            console.log(`flag1, days:${days}`)
-            return days;
+    const updateDays = (globalDays,start,end)=>{
+        let newDays = [...globalDays];
+        if (newDays.length==0){ // when this is the first event
+            newDays.push(start,end)
+            console.log(`flag1, newDays:${newDays}`)
+            return newDays;
         } else { // determine whether the current event clashed with any existing events
             // //vds[vdKeys[j][x][0]]
-            for (let e=0;e<days.length/2;e++){
-                if (%2==0){ // d is even, ie a start
-                    if (s<days[d] && e<days[d]){ //(start, end) earlier than d 
-                        days = days.slice(0,d).concat(s,e).concat([...days.slice(d)]);
-                        console.log(`flag2, days:${days}`)
-                        return days;
-                    }
-                } else if (d==days.length-1) {    // the last ending
-                    if (s>days[d] && e>days[d]){ //(start,end) later than d
-                        days = days.push(s,e);
-                        console.log(`flag3, days:${days}`)
-                        return days;
-                    }
+            for (let e=0;e<newDays.length/2;e++){
+                eStart = newDays[2*e]; // current start
+                eEnd = newDays[2*e+1]; // current end
+				console.log(`start,end,eStart,eEnd: ${start}, ${end}, ${eStart}, ${eEnd}`)
+                if ((start>=eStart && start<=eEnd) || (end>=eStart && end<=eEnd)){ // new start falls into current event or new end falls into current event
+                    console.log(`flag2, newDays:${newDays}`)
+                    return newDays
+                } else if (start<eStart && end<eStart) { // insert before current event
+                    newDays = newDays.slice(0,2*e).concat(start,end).concat(newDays.slice(2*e))
+                    console.log(`flag3, newDays:${newDays}`)
+                    return newDays
                 }
             }
-            return days;
+            newDays.push(start,end) // later than all occupied days, to be added at the end of the array
+            console.log(`flag4, newDays:${newDays}`)
+            return newDays;
         }
     }
     for (let j=0;j<vdKeys.length;j++){
-        vds[vdKeys[j]] = vds[vdKeys[j]].sort((a,b)=>(b[2]-a[2]))
+        vds[vdKeys[j]] = vds[vdKeys[j]].sort((a,b)=>(b[2]-a[2])) // sort each event array by decreading value
+        let newDays = [];
         for (let x=0;x<vds[vdKeys[j]].length;x++){
             if (eventCount<k){
-                if (days.length<updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1]).length){
-                    days = updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1]);
+                console.log(`days before: ${days}`)
+                newDays = updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1])
+                console.log(`days after: ${days}`)
+                console.log(`newDays: ${newDays}`)
+                if (days.length<newDays.length){
+                    days = newDays;
                     total += vds[vdKeys[j]][x][2]*1;
                     eventCount++;
                 }
             } else {
-                return total
+                return total //break iteration and return total
             }
         }
     }
+    return total
 };
+*/
+
+var maxValue = function(events, k) {
+    let total = 0;
+    // Greedy:
+    // 1. Value
+    // 2. Value density
+    // (3. duration)
+    let vals = {}; // hash for val den, {vd:[[start1,end1], [start2,end2],...]}
+    // Allocate based on max value 
+    // Value density = Value / (stop - start)
+    let val = 0;
+    for (let i=0;i<events.length;i++){
+        val = events[i][2];
+        if (vals[val]!=undefined){
+            vals[val].push(events[i]);
+            console.log("repeated");
+        } else {
+            console.log(`vd: ${vd}`);
+            vds[vd]=[events[i]];
+        }
+    }
+    let vdKeys = Object.keys(vds).sort((a,b)=>(b-a));
+    let eventCount = 0;
+    let days = []; // occupied days - [start1, end1, start2, end2,...]
+    const updateDays = (globalDays,start,end)=>{
+        let newDays = [...globalDays];
+        if (newDays.length==0){ // when this is the first event
+            newDays.push(start,end)
+            console.log(`flag1, newDays:${newDays}`)
+            return newDays;
+        } else { // determine whether the current event clashed with any existing events
+            // //vds[vdKeys[j][x][0]]
+            for (let e=0;e<newDays.length/2;e++){
+                eStart = newDays[2*e]; // current start
+                eEnd = newDays[2*e+1]; // current end
+				console.log(`start,end,eStart,eEnd: ${start}, ${end}, ${eStart}, ${eEnd}`)
+                if ((start>=eStart && start<=eEnd) || (end>=eStart && end<=eEnd)){ // new start falls into current event or new end falls into current event
+                    console.log(`flag2, newDays:${newDays}`)
+                    return newDays
+                } else if (start<eStart && end<eStart) { // insert before current event
+                    newDays = newDays.slice(0,2*e).concat(start,end).concat(newDays.slice(2*e))
+                    console.log(`flag3, newDays:${newDays}`)
+                    return newDays
+                }
+            }
+            newDays.push(start,end) // later than all occupied days, to be added at the end of the array
+            console.log(`flag4, newDays:${newDays}`)
+            return newDays;
+        }
+    }
+    for (let j=0;j<vdKeys.length;j++){
+        vds[vdKeys[j]] = vds[vdKeys[j]].sort((a,b)=>(b[2]-a[2])) // sort each event array by decreading value
+        let newDays = [];
+        for (let x=0;x<vds[vdKeys[j]].length;x++){
+            if (eventCount<k){
+                console.log(`days before: ${days}`)
+                newDays = updateDays(days,vds[vdKeys[j]][x][0],vds[vdKeys[j]][x][1])
+                console.log(`days after: ${days}`)
+                console.log(`newDays: ${newDays}`)
+                if (days.length<newDays.length){
+                    days = newDays;
+                    total += vds[vdKeys[j]][x][2]*1;
+                    eventCount++;
+                }
+            } else {
+                return total //break iteration and return total
+            }
+        }
+    }
+    return total
+};
+
 let tEvents = [[1,2,4],[3,4,3],[2,3,1]]
-let tk = 2
+tEvents = [[1,1,1],[2,2,2],[3,3,3],[4,4,4]]
+tEvents[[30,40,34],[6,11,6],[60,81,36]]
+let tk = 3
+tk=1
 let a = performance.now();
 console.log(maxValue(tEvents,tk));
 let b = performance.now();
