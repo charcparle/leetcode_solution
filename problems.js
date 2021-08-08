@@ -633,7 +633,7 @@ var maxValue3 = function(events, k) { // using time sequence approach
             return (a[0-b[0]])
         }
     }
-    let e = events.sort((a,b)=>(sortFn) // sort event list in ascending start time
+    let e = events.sort((a,b)=>(sortFn)) // sort event list in ascending start time
     console.log(e);
     let total = 0;
     const nextEvent = (currentEvent)=>{
@@ -642,7 +642,7 @@ var maxValue3 = function(events, k) { // using time sequence approach
                 return e[i]
             }
         }
-        return [0,0,0]
+        return []
     }
     const altEvent = (currentEvent)=>{
         for (let i=0;i<e.length;i++){
@@ -650,18 +650,18 @@ var maxValue3 = function(events, k) { // using time sequence approach
                 return e[i]
             }
         }
-        return [0,0,0]
+        return []
     }
     const solve = (cur,count)=>{ //input: event, output: value
         // find out the value of the chain of choice starting from this current event
-        // 1. either attend this event and take the value
-        // 2. or skip this event, keep total value unchanged and consider the next immediate event
-        
+        if (cur.length=0 || count<=0) return 0
+        let chain1 = cur[2];
+        let next = nextEvent(cur);
+        let chain2 = 0;
+        let alt = altEvent(cur);
+        return Math.max(chain1+solve(next,count-1), chain2+solve(alt,count))
     }
-/* for (let i=0;i<e.length;i++){
-    total += max(e[i][2],nextEvent(e[i]))
-} */
-
+    return Math.max(solve(e[0],k),solve(altEvent,k))
 }
 
 let tEvents = [[1,2,4],[3,4,3],[2,3,1]]
