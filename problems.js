@@ -583,7 +583,9 @@ var defangIPaddr = function(address) {
     return total
 };
 
-const findCombo = (eventArr, target) => { // use recursion to find which combo sums up to be the "target"
+const findCombo = (eventArr, target) => {  // for verifying the answer in the test
+    /*
+    // use recursion to find which combo sums up to be the "target"
     if (target<0){
         return undefined
     } else {
@@ -591,7 +593,75 @@ const findCombo = (eventArr, target) => { // use recursion to find which combo s
             if (eventArr[i])
         } 
     }
+    */
+   // dynamic programming, store sum as hash
+    let sumList = {};    // {sum1:[val1,val2,...], sum2:[val1,val4,...],...}
+    let sumKeys = [];
+    for (let i=0;i<eventArr.length;i++){
+        let val = eventArr[i][2]*1;
+        if (val==target) return [val];
+        if (sumList[target-val]!=undefined){
+            return sumList[target-val].concat(val)
+        } else {
+            sumKeys = Object.keys(sumList);
+            let valX = 0
+            for (let x=0;x<sumKeys.length;x++){
+                valX = sumKeys[x]*1;
+                console.log(target)
+                if ((val+valX)==target){
+                    return sumList[valX].concat(val)
+                } else if ((val+valX)<target) {
+                    sumList[val+valX] = sumList[valX].concat(val)
+                }
+                console.log(sumList)
+            }
+        }
+        sumList[val] = [val]
+    }
+    return [];
+
     
+}
+
+var maxValue3 = function(events, k) { // using time sequence approach
+    // 1. either attend this event and take the value
+    // 2. or skip this event, keep total value unchanged and consider the next immediate event
+    let sortFn = (a,b)=>{
+        if (a[0]==b[0]){
+            return (a[1]-b[1])
+        } else {
+            return (a[0-b[0]])
+        }
+    }
+    let e = events.sort((a,b)=>(sortFn) // sort event list in ascending start time
+    console.log(e);
+    let total = 0;
+    const nextEvent = (currentEvent)=>{
+        for (let i=0;i<e.length;i++){
+            if (e[i][0]>currentEvent[1]) { //next non-clashing event (start after last end)
+                return e[i]
+            }
+        }
+        return [0,0,0]
+    }
+    const altEvent = (currentEvent)=>{
+        for (let i=0;i<e.length;i++){
+            if (e[i][0]>currentEvent[0]) { //next immediate event (start time)
+                return e[i]
+            }
+        }
+        return [0,0,0]
+    }
+    const solve = (cur,count)=>{ //input: event, output: value
+        // find out the value of the chain of choice starting from this current event
+        // 1. either attend this event and take the value
+        // 2. or skip this event, keep total value unchanged and consider the next immediate event
+        
+    }
+/* for (let i=0;i<e.length;i++){
+    total += max(e[i][2],nextEvent(e[i]))
+} */
+
 }
 
 let tEvents = [[1,2,4],[3,4,3],[2,3,1]]
@@ -600,7 +670,10 @@ tEvents[[30,40,34],[6,11,6],[60,81,36]] //1, 36
 tEvents = [[69,83,61],[44,90,19],[26,87,9]] //3, 61
 tEvents = [[31,57,53],[5,63,29],[54,57,32],[55,83,28],[25,64,5],[5,33,33],[32,68,27],[30,99,54]] //4, 65
 tEvents = [[3,68,97],[12,46,13],[21,24,75],[64,85,74],[10,98,15],[23,84,62],[87,96,29],[80,85,39],[52,89,77],[31,63,91],[29,40,48],[30,96,42],[69,81,68],[52,58,65],[41,52,37]]
-// 10, 291
+// 10, 291, [97, 13, 75, 15, 62, 29]
+// cf 256 [13, 75, 62, 29, 77]
+
+
 let tk = 3
 tk=4
 let a = performance.now();
