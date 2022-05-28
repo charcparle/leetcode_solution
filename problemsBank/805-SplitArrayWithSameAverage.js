@@ -103,9 +103,6 @@ var splitArraySameAverage2 = function (nums) {
     // Reject obvious case
     if (nums.length === 1) return false
     if (nums.length === 2 && nums[0] !== nums[1]) return false
-    // // Start with sorting the input array
-    nums.sort((a, b) => (a - b))
-    console.log(nums)
     let sameAverage = false
     const average = (arr) => {
         let sum = 0
@@ -115,39 +112,51 @@ var splitArraySameAverage2 = function (nums) {
         return (sum / arr.length)
     }
     const avgNums = average(nums)
-    // divide into two queues: below and above average
-    let below = [], above = []
-    for (let num of nums) {
-        if (num === avgNums) {
-            sameAverage = true
-            console.log(num)
-            return sameAverage
-        } else if (num < avgNums) {
-            below.push(num)
-        } else {
-            above.push(num)
-        }
-    }
-    console.log(below, above)
     let comboBank = {} // {length: {Diff=sumArray-avgNums*Array.length:[Array]}}
-    const genCombo = (arr) => {
-        let combos = [arr]
-        if (arr.length === 1) return [arr]
+    const genCombo = (arr, len) => {
+        let combos = []
+        if (len < 1) return [[]]
         for (let i = 0; i < arr.length; i++) {
+            let newCombo = []
             let others = [...arr.slice(0, i), ...arr.slice(i + 1, arr.length)]
-            comboBank[others.length][others]
-            combos = [...combos, ...genCombo(others)]
+            for (let subArr of genCombo(others, len - 1)) {
+                /*
+                let sumSubArr = subArr.reduce((acc, cur) => (acc + cur), 0)
+                let targetSum = avgNums * subArr.length
+                let key = sumSubArr - avgNums * subArr.length
+                comboBank[subArr.length] = {...comboBank[subArr.length], [key]: subArr }
+                if (sumSubArr === targetSum || comboBank[subArr.length][targetSum - sumSubArr]) {
+                    sameAverage = true
+                    console.log(`array: ${subArr}`)
+                    console.log(`another array: ${comboBank[subArr.length][targetSum - sumSubArr]}`)
+                    console.log(comboBank)
+                    return combos
+                }
+                newCombo = [...newCombo, [arr[i], ...subArr]]
+                */
+               let newSubArr = [arr[i], ...subArr]
+               newCombo = [...newCombo, newSubArr]
+               let newSubArr_sum = newSubArr.reduce((acc, cur) => (acc + cur), 0)
+               let targetSum = avgNums * newSubArr.length
+               let key = newSubArr_sum - targetSum
+               comboBank[newSubArr.length] = {...comboBank[newSubArr.length], [key]: newSubArr }
+               if (newSubArr_sum === targetSum || comboBank[newSubArr.length][targetSum - newSubArr_sum]) {
+                   sameAverage = true
+                   console.log(`array: ${newSubArr}`)
+                   console.log(`another array: ${comboBank[newSubArr.length][targetSum - newSubArr_sum]}`)
+                   console.log(comboBank)
+                   return combos
+               }
+            }
+            combos = [...combos, ...newCombo]
+            if (sameAverage) return combos
         }
+
         return combos
     }
-    genCombo()
-
-    while (sameAverage === false) {
-
-    }
-
     console.time("gen")
-    // genAllCombinations(nums)
+    genCombo(nums, Math.floor(nums.length / 2))
+    console.log(comboBank)
     console.timeEnd("gen")
     return sameAverage
 };
@@ -167,6 +176,8 @@ var splitArraySameAverage3 = function (nums) {
         return (sum / arr.length)
     }
     const target = average(nums)
+    const maxSize = Math.floor(nums.length / 2)
+    let read = 0
     console.log(`target: ${target}`)
     console.log(`total: ${target * nums.length}`)
     const genAllCombinations = (arr) => {
@@ -174,6 +185,7 @@ var splitArraySameAverage3 = function (nums) {
         // @return an array, containing all combinations, e.g. [[a],[b],[c],[a,b],[a,c],[b,c],[a,b,c] ] for [a,b,c]
         let comboAll = []
         let others = []
+        if (arr.length <= maxSize) return []
         if (arr.length === 1) {
             return [arr]
         }
@@ -189,6 +201,7 @@ var splitArraySameAverage3 = function (nums) {
                 comboAll = [...comboAll, ...genAllCombinations(others)]
                 bank[others] = comboAll
             } else {
+                read += 1
                 comboAll = bank[others]
             }
             if (sameAverage) return comboAll //for stopping the loop
@@ -197,15 +210,21 @@ var splitArraySameAverage3 = function (nums) {
     }
     console.time("gen")
     genAllCombinations(nums)
+    console.log(`read: ${read}`)
     console.timeEnd("gen")
     return sameAverage
 };
+const reducer = (arr) => {
+    return arr.reduce((acc, cur) => (acc + cur))
+}
 
 let test = [1, 2, 3, 4, 5, 6, 7, 8]
-test = [1, 2, 3]
+// test = [1, 2, 3]
 // test = [1, 4, 9]
 test = [84, 44, 32, 42, 26, 26, 87, 65, 12, 95, 68, 41, 6, 72, 8, 15, 66, 55, 71, 79, 6] //expect: false
 // test = [84, 44, 32, 42, 26, 26, 87, 65, 12, 95, 68, 41, 6, 72, 8, 15, 66, 55, 71, 85] //expect: true
-// test = [10,29,13,53,33,48,76,70,5,5] //expect: true
+// test = [10, 29, 13, 53, 33, 48, 76, 70, 5, 5] //expect: true
 // console.log(splitArraySameAverage(test))
-console.log(splitArraySameAverage3(test))
+console.log(splitArraySameAverage2(test))
+// console.log(splitArraySameAverage3(test))
+// console.log(reducer(test))
