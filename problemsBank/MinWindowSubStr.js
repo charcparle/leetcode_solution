@@ -59,7 +59,7 @@ Another example: if strArr is ["aabdccdbcacd", "aad"] then the smallest substrin
   return strArr[0].substring(foundLeft, foundRight + 1);
 } */
 
-const MinWindowSubstring = (strArr) => {
+/* const MinWindowSubstring = (strArr) => {
   // code goes here
   // string K can contain repeated characters
   // Build hash table of string K characters key=char, val=count
@@ -127,8 +127,71 @@ const MinWindowSubstring = (strArr) => {
   };
 
   return checkSubstring(strArr[0], memN);
+}; */
+
+const MinWindowSubstring = (strArr) => {
+  // code goes here
+  // string K can contain repeated characters
+  // Build hash table of string K characters key=char, val=count
+  let memK = {};
+  for (let k of strArr[1].split("")) {
+    if (k in memK) memK[k] += 1;
+    else memK[k] = 1;
+  }
+  console.log(memK)
+  const arrK = Object.keys(memK);
+
+  // Build hash table of string N
+  let memN = {};
+  // for (let n of strArr[0].split("")) {
+  //   if (n in memN) memN[n] += 1;
+  //   else memN[n] = 1;
+  // }
+
+  let hash = {};
+
+  // Pointer approach:
+  // Loop through String N - if stringN[i] hits memK, the corresponding count of key in memK decreases
+  let bingoIdx = [];
+  let left = "";
+  let countdown = strArr[1].length;
+  let min = strArr[0]
+  const arrN = strArr[0].split("");
+  for (let i = 0; i < arrN.length; i++) {
+    if (arrN[i] in memK) {
+      // The earliest hit is saved as "left", the index of character hitting memK to be saved as an array "bingoIdx", countdown decreases
+      if (bingoIdx.length === 0) {
+        left = arrN[i];
+      }
+      bingoIdx = [...bingoIdx, i];
+      if (memK[arrN[i]] >= 1) {
+        memK[arrN[i]] -= 1;
+        countdown -=1
+        // bingoIdx = [...bingoIdx, i];
+      } else if (arrN[i] === left) {
+        // If the corresponding count at memK becomes zero but there's another hit, it should remain zero, index still saved to bingoIdx, countdown remains unchanged
+        //  but if that coincides with "left", "left" should be updated as the next element in "bingoIdx"
+        bingoIdx.shift();
+        left = arrN[bingoIdx[0]];
+        // bingoIdx = [...bingoIdx, i];
+      }
+      // console.log(left)
+    }
+    console.log(bingoIdx)
+    if (countdown===0){
+      if(min.length>strArr[0].substring(bingoIdx[0],i+1).length){
+        min = strArr[0].substring(bingoIdx[0],i+1)
+      } 
+    }
+    console.log(min)
+  }
+  // the rolling "min window" is defined by "left" and the last hit when countdown is zero
+
+  return min
 };
 
 console.log(MinWindowSubstring(["aabdccdbcacd", "aad"])); //aabd
 console.log(MinWindowSubstring(["aaffsfsfasfasfasfasfasfacasfafe", "fafsf"])); //affsf
 console.log(MinWindowSubstring(["vvavereveaevafefaef", "vvev"])); //vvave
+console.log(MinWindowSubstring(["abcccccccddddab", "dab"])); //dab
+console.log(MinWindowSubstring(["abcccccccdbbbac", "dab"])); //dbbba
